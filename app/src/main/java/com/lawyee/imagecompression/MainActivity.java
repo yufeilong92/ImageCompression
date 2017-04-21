@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +13,8 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -65,13 +66,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //bitmap 转换成string
-    public static String bitampToString(String filePath) {
+    public String bitampToString(String filePath,String fileName) {
         Bitmap bitmap = getSmallBitmap(filePath);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 30, baos);
-        byte[] b = baos.toByteArray();
-
-        return Base64.encodeToString(b, Base64.DEFAULT);
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 30, baos);
+//        byte[] b = baos.toByteArray();
+//        File f = new File(this.getCacheDir() + "121546" + ".png");
+        File f = new File(this.getCacheDir() + fileName + ".png");
+//        Log.d("==", "压缩图片的路径"+this.getCacheDir() + "15641651" + ".png");
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+        }
+        FileOutputStream fOut = null;
+        try {
+            fOut = new FileOutputStream(f);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        bitmap.compress(Bitmap.CompressFormat.PNG, 30, fOut);
+        try {
+            fOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return this.getCacheDir() + fileName + ".png";
 
     }
 
@@ -88,22 +113,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_YaSuo:
-                String s = bitampToString(path);
+                String s = bitampToString(path,"123s489");
+//                Bitmap bitmap = ImageUtil.getloadPicBitmap(s);
+                File file = new File(s);
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    Bitmap bitmap1 = BitmapFactory.decodeStream(fileInputStream);
+                    mIvShow.setImageBitmap(bitmap1);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
                 Toast.makeText(MainActivity.this, "" + s, Toast.LENGTH_SHORT).show();
-                Log.d("=====", "onClick: " + s);
-                Bitmap smallBitmap = getSmallBitmap(path);
-                mIvShow.setImageBitmap(smallBitmap);
-                int scrollBarSize = mIvShow.getScrollBarSize();
-                Log.d("====", "onClick: " + scrollBarSize);
-                saveMyBitmap("测试图片",smallBitmap);
+
                 break;
         }
     }
 
-    public void saveMyBitmap(String bitName, Bitmap mBitmap) {
+    public String saveMyBitmap(String bitName, String path) {
 //获取内置存储下的缓存目录，可以用来保存一些缓存文件如图片，当内置存储的空间不足时将系统自动被清除
+        Bitmap mBitmap = getSmallBitmap(bitName);
         File f = new File(this.getCacheDir() + bitName + ".png");
-        Log.d("==", "压缩图片的路径"+this.getCacheDir() + bitName + ".png");
+        Log.d("==", "压缩图片的路径" + this.getCacheDir() + bitName + ".png");
 //        File f = new File("/sdcard/" + bitName + ".png");
         try {
             f.createNewFile();
@@ -127,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return this.getCacheDir() + bitName + ".png";
     }
 
 
@@ -153,34 +185,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return outputFile.getPath();
     }*/
-  //  判断照片角度
+    //  判断照片角度
 
-/*
-    public static int readPictureDegree(String path) {
-        int degree = 0;
-        try {
-            ExifInterface exifInterface = new ExifInterface(path);
-            int orientation = exifInterface.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    degree = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    degree = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    degree = 270;
-                    break;
+    /*
+        public static int readPictureDegree(String path) {
+            int degree = 0;
+            try {
+                ExifInterface exifInterface = new ExifInterface(path);
+                int orientation = exifInterface.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL);
+                switch (orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        degree = 90;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        degree = 180;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        degree = 270;
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return degree;
-    }*/
-   // 旋转照片
-    public static Bitmap rotateBitmap(Bitmap bitmap,int degress) {
+            return degree;
+        }*/
+    // 旋转照片
+    public static Bitmap rotateBitmap(Bitmap bitmap, int degress) {
         if (bitmap != null) {
             Matrix m = new Matrix();
             m.postRotate(degress);
