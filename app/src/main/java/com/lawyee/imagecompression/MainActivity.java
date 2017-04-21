@@ -101,8 +101,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void saveMyBitmap(String bitName, Bitmap mBitmap) {
-
-        File f = new File("/sdcard/" + bitName + ".png");
+//获取内置存储下的缓存目录，可以用来保存一些缓存文件如图片，当内置存储的空间不足时将系统自动被清除
+        File f = new File(this.getCacheDir() + bitName + ".png");
+        Log.d("==", "压缩图片的路径"+this.getCacheDir() + bitName + ".png");
+//        File f = new File("/sdcard/" + bitName + ".png");
         try {
             f.createNewFile();
         } catch (IOException e) {
